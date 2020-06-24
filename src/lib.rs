@@ -24,7 +24,10 @@ pub const fn leb128_size<T>() -> usize {
 }
 
 macro_rules! impl_generic_leb128 {
-    ($fn_name:ident, $int_ty:ident, $post:tt) => {
+    ($fn_name:ident, $int_ty:ident, $post:tt, $int_name:expr) => {
+        #[doc="Recognizes an LEB128-encoded number that fits in a `"]
+        #[doc=$int_name]
+        #[doc="`."]
         #[inline]
         pub fn $fn_name<I, E>(input: I) -> IResult<I, $int_ty, E>
         where
@@ -42,7 +45,7 @@ macro_rules! impl_generic_leb128 {
                 } else if pos == _leb128_size::<$int_ty>() - 1 {
                     return Err(nom::Err::Error(E::add_context(
                         input.clone(),
-                        concat!("LEB128 integer is too big to fit in ", stringify!($int_ty)),
+                        concat!("LEB128 integer is too big to fit in ", $int_name),
                         make_error(input, ErrorKind::TooLarge),
                     )));
                 } else {
@@ -53,6 +56,9 @@ macro_rules! impl_generic_leb128 {
 
             Err(nom::Err::Incomplete(NEED_ONE))
         }
+    };
+    ($fn_name:ident, $int_ty:ident, $post:tt) => {
+        impl_generic_leb128!($fn_name, $int_ty, $post, stringify!($int_ty));
     };
 }
 
