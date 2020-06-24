@@ -1,13 +1,14 @@
+#![no_std]
+use core::{
+    mem::size_of,
+    num::NonZeroUsize,
+    ops::{BitOrAssign, RangeFrom},
+};
 use nom::{
     error::{make_error, ContextError, ErrorKind, ParseError},
     IResult, InputIter, InputLength, Needed, Slice,
 };
 use num_traits::{PrimInt, Signed, WrappingNeg};
-use std::{
-    mem::size_of,
-    num::NonZeroUsize,
-    ops::{BitOrAssign, RangeFrom},
-};
 
 // TODO: when stable, use const NonZeroUsize::new(1).unwrap()
 const NEED_ONE: nom::Needed = Needed::Size(unsafe { NonZeroUsize::new_unchecked(1) });
