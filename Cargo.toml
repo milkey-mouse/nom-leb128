@@ -13,3 +13,10 @@ edition = "2018"
 [dependencies]
 nom = "6.0.0-alpha1"
 num-traits = "0.2.12"
+
+[dev-dependencies]
+arrayvec = "0.5.1"
+
+# TODO: cargo-fuzz should enable dev-dependencies
+[target.'cfg(fuzzing)'.dependencies]
+arrayvec = "0.5.1"
