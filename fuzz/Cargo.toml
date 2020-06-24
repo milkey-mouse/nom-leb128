@@ -1,0 +1,94 @@
+
+[package]
+name = "nom-leb128-fuzz"
+version = "0.0.0"
+authors = ["Automatically generated"]
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.3"
+arrayvec = "0.5.1"
+nom = "6.0.0-alpha1"
+
+[dependencies.nom-leb128]
+path = ".."
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "roundtrip_u8"
+path = "fuzz_targets/roundtrip_u8.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_u16"
+path = "fuzz_targets/roundtrip_u16.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_u32"
+path = "fuzz_targets/roundtrip_u32.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_u64"
+path = "fuzz_targets/roundtrip_u64.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_u128"
+path = "fuzz_targets/roundtrip_u128.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_usize"
+path = "fuzz_targets/roundtrip_usize.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_i8"
+path = "fuzz_targets/roundtrip_i8.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_i16"
+path = "fuzz_targets/roundtrip_i16.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_i32"
+path = "fuzz_targets/roundtrip_i32.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_i64"
+path = "fuzz_targets/roundtrip_i64.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_i128"
+path = "fuzz_targets/roundtrip_i128.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "roundtrip_isize"
+path = "fuzz_targets/roundtrip_isize.rs"
+test = false
+doc = false
