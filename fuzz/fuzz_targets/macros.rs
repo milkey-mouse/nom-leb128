@@ -1,3 +1,5 @@
+#![allow(unused_macros)]
+
 macro_rules! roundtrip_unsigned {
     ($int_ty:ident, $decoder:ident) => {
         libfuzzer_sys::fuzz_target!(|num: $int_ty| {
