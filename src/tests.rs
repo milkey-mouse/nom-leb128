@@ -1,11 +1,12 @@
 use super::*;
 use arrayvec::ArrayVec;
+#[cfg(feature = "std")]
+use nom::error::{
+    VerboseError,
+    VerboseErrorKind::{Context, Nom},
+};
 use nom::{
-    error::{
-        ErrorKind::TooLarge,
-        VerboseError,
-        VerboseErrorKind::{Context, Nom},
-    },
+    error::ErrorKind::TooLarge,
     Err::{Error, Incomplete},
 };
 use num_traits::{AsPrimitive, PrimInt, Signed, Unsigned};
@@ -13,6 +14,11 @@ use num_traits::{AsPrimitive, PrimInt, Signed, Unsigned};
 // TODO: when https://github.com/rust-lang/rust/issues/43408 is fixed,
 // write_*_leb128 can use exactly-sized ArrayVecs with const leb128_size
 const MAX_ENCODED_SIZE: usize = leb128_size::<u128>();
+
+#[cfg(feature = "std")]
+type NomError<'a> = VerboseError<&'a [u8]>;
+#[cfg(not(feature = "std"))]
+type NomError = ();
 
 #[inline]
 pub fn write_unsigned_leb128<T>(mut n: T) -> ArrayVec<[u8; MAX_ENCODED_SIZE]>
@@ -63,8 +69,7 @@ macro_rules! test_roundtrip {
         fn $int_ty() {
             for n in $iter {
                 let encoded = $encoder(n);
-                // TODO: use nom::VerboseError instead of ()
-                let decoded = $decoder::<_, VerboseError<_>>(encoded.as_slice()).unwrap();
+                let decoded = $decoder::<_, NomError>(encoded.as_slice()).unwrap();
 
                 assert_eq!(decoded, (&[] as &[u8], n));
             }
@@ -91,7 +96,7 @@ macro_rules! test_tricky_unsigned {
             $int_ty,
             write_unsigned_leb128,
             $decoder,
-            [0, 1, 128, 255, 256, 65535, 65536, $int_ty::MAX]
+            [0, 1, 127, 128, 255, 256, 65535, 65536, $int_ty::MAX]
                 .iter()
                 .copied()
         );
@@ -112,6 +117,7 @@ macro_rules! test_tricky_signed {
             [
                 0,
                 1,
+                127,
                 128,
                 255,
                 256,
@@ -119,6 +125,7 @@ macro_rules! test_tricky_signed {
                 65536,
                 $int_ty::MAX,
                 -1,
+                -127,
                 -128,
                 -255,
                 -256,
@@ -137,13 +144,12 @@ test_tricky_signed!(i64, leb128_i64);
 test_tricky_signed!(i128, leb128_i128);
 test_tricky_signed!(isize, leb128_isize);
 
-// TODO: add some should_fail tests
 #[test]
 fn data_after_num() {
     let mut vec = write_unsigned_leb128(1337u32);
     vec.extend(b"hello".iter().copied());
 
-    let (slice, decoded) = leb128_u32::<_, VerboseError<_>>(vec.as_slice()).unwrap();
+    let (slice, decoded) = leb128_u32::<_, NomError>(vec.as_slice()).unwrap();
 
     assert_eq!(slice, b"hello");
     assert_eq!(decoded, 1337);
@@ -154,19 +160,32 @@ fn truncated_num() {
     let mut vec = write_unsigned_leb128(u64::MAX);
     vec.truncate(2);
 
-    let res = leb128_u32::<_, VerboseError<_>>(vec.as_slice());
+    let res = leb128_u32::<_, NomError>(vec.as_slice());
 
     assert_eq!(res, Err(Incomplete(NEED_ONE)));
 }
 
+// when std is enabled, overflow() checks the specific error message
+
 #[test]
+#[cfg(not(feature = "std"))]
+fn overflow() {
+    let vec = write_unsigned_leb128(u64::MAX);
+
+    let res = leb128_u16::<_, (_, ErrorKind)>(vec.as_slice());
+
+    assert_eq!(res, Err(Error((vec.as_slice(), TooLarge))));
+}
+
+#[test]
+#[cfg(feature = "std")]
 fn overflow() {
     let vec = write_unsigned_leb128(u64::MAX);
 
     let res = leb128_u16::<_, VerboseError<_>>(vec.as_slice());
 
     if let Err(Error(verbose_error)) = res {
-        assert_eq!(verbose_error.errors[0].1, Nom(TooLarge));
+        assert_eq!(verbose_error.errors[0], (vec.as_slice(), Nom(TooLarge)));
         assert_eq!(
             verbose_error.errors[1].1,
             Context("LEB128 integer is too big to fit in u16")
