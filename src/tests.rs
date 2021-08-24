@@ -21,7 +21,7 @@ type NomError<'a> = VerboseError<&'a [u8]>;
 type NomError = ();
 
 #[inline]
-pub fn write_unsigned_leb128<T>(mut n: T) -> ArrayVec<[u8; MAX_ENCODED_SIZE]>
+pub fn write_unsigned_leb128<T>(mut n: T) -> ArrayVec<u8, MAX_ENCODED_SIZE>
 where
     T: AsPrimitive<u8> + PrimInt + Unsigned,
     u8: AsPrimitive<T>,
@@ -39,7 +39,7 @@ where
 }
 
 #[inline]
-pub fn write_signed_leb128<T>(mut n: T) -> ArrayVec<[u8; MAX_ENCODED_SIZE]>
+pub fn write_signed_leb128<T>(mut n: T) -> ArrayVec<u8, MAX_ENCODED_SIZE>
 where
     T: AsPrimitive<u8> + PrimInt + Signed,
 {
