@@ -14,7 +14,7 @@ edition = "2018"
 std = ["nom/std"]
 
 [dependencies]
-nom = { version = "6.0.0-alpha1", default-features = false }
+nom = { version = "7.0.0", default-features = false }
 num-traits = { version = "0.2.12", default-features = false }
 
 [dev-dependencies]
