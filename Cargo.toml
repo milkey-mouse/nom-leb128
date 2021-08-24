@@ -7,7 +7,7 @@ authors = ["Milkey Mouse <milkeymouse@meme.institute>"]
 repository = "https://github.com/milkey-mouse/nom-leb128"
 readme = "README.md"
 license = "CC0-1.0"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 
 [features]
